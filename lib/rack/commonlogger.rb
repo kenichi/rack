@@ -1,4 +1,5 @@
 require 'rack/body_proxy'
+require 'logger'
 
 module Rack
   # Rack::CommonLogger forwards every request to the given +app+, and
@@ -11,6 +12,8 @@ module Rack
   #
   # +logger+ can be any class, including the standard library Logger, and is
   # expected to have a +write+ method, which accepts the CommonLogger::FORMAT.
+  # If +logger" is an instance of the standard library Logger, CommonLogger will
+  # use the underlying IO device, bypassing any "level" settings.
   # According to the SPEC, the error stream must also respond to +puts+
   # (which takes a single argument that responds to +to_s+), and +flush+
   # (which is called without arguments in order to make the error appear for
@@ -26,6 +29,7 @@ module Rack
     def initialize(app, logger=nil)
       @app = app
       @logger = logger
+      @logger = @logger.instance_variable_get(:@logdev) if ::Logger === @logger
     end
 
     def call(env)

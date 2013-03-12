@@ -47,6 +47,13 @@ describe Rack::CommonLogger do
     res.errors.should =~ /"GET \/ " 200 - /
   end
 
+  should "use underlying IO device if given a ::Logger instance" do
+    log = ::Logger.new(io = StringIO.new)
+    Rack::MockRequest.new(Rack::CommonLogger.new(app, log)).get("/")
+
+    io.string.should =~ /"GET \/ " 200 #{length} /
+  end
+
   def length
     123
   end
